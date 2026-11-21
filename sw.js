@@ -1,5 +1,5 @@
 /* © 2026 Genzineers. GSAL v1.0 — see LICENSE. Offline support: network first, cache fallback. */
-const CACHE = 'env-scanner-v1';
+const CACHE = 'env-scanner-v2';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'scan3d.js', 'icon.svg', 'manifest.webmanifest'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

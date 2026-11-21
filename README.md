@@ -1,6 +1,6 @@
 # Genzineers Environment Scanner
 
-Walk into a room and scan it with the phone, tablet or laptop you already have. It finds Bluetooth devices, looks for hidden camera lenses, maps the room's shape with sonar, builds a 3D point cloud, and reads every sensor your browser lets websites use. It's a web app with nothing to install, and nothing you scan leaves your device.
+Walk into a room and scan it with the phone, tablet or laptop you already have. It finds Bluetooth devices, looks for hidden camera lenses, maps the room's shape with sonar, 3D-scans rooms and objects you can download as models, and reads every sensor your browser lets websites use. It's a web app with nothing to install, and nothing you scan leaves your device.
 
 **▶ Open the app: https://the-potential-dropout.github.io/environment-scanner/**
 
@@ -10,7 +10,7 @@ Works in Chrome, Edge, Samsung Internet, Safari (macOS/iOS/iPadOS), Firefox and 
 
 | Scanner | How it works | Where it works |
 |---|---|---|
-| **3D room scan** | **AR depth** (ARCore depth / ToF sensor, real metres), **AI depth from the camera** (Depth Anything V2, runs on your device, stitched around you with the compass), or **import a LiDAR scan** (.ply/.obj from 3D Scanner App, Polycam, Scaniverse). Orbit, top view, export .ply. | AR: Android Chrome on ARCore phones. AI + import: everywhere |
+| **3D scanner: rooms & objects** | **Room mode** scans whole rooms; **Object mode** scans a single item on a table (turntable or walk-around), levels it, removes the table and stray points. Methods: **AR depth** (ARCore depth / ToF sensor, real metres), **AI depth from the camera** (Depth Anything V2, runs on your device), or **import a LiDAR scan** (.ply/.obj/.xyz from 3D Scanner App, Polycam, Scaniverse). Orbit, top view, and **download as GLB, OBJ, STL (mm, for 3D printing), PLY mesh, PLY points, GLB points or XYZ**. | AR: Android Chrome on ARCore phones. AI + import + downloads: everywhere |
 | **Bluetooth devices** | Lists nearby BLE devices, estimates distance from signal strength, hot/cold finder, flags AirTag / Find My, Tile, SmartTag trackers and likely cameras | Chrome, Edge, Samsung Internet (Android, Windows, Mac, Linux). iOS: use the Bluefy browser |
 | **Hidden camera finder** | Flashlight + live image analysis circles steady pin-point lens reflections; IR mode spots night-vision LEDs | Every browser with a camera |
 | **Magnetic / EMF** | Magnetometer field strength with calibration, chart and Geiger-style sound | Android Chrome (sensor flag) |

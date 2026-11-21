@@ -250,3 +250,13 @@ pre code { background: none; padding: 0; word-break: normal; }
 .modal-ico { font-size: 2rem; width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
 .modal .btn { flex: 0 0 auto; }
 @media (max-width: 640px) { .viewer-ui .btn { padding: 6px 10px; } }
+
+/* 3D scanner modes */
+.seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px; margin-bottom: 12px; }
+.seg button { border: 0; background: none; color: var(--text); font: inherit; padding: 8px 18px; border-radius: 999px; cursor: pointer; min-height: 38px; }
+.seg button.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+#dl-name { min-width: 150px; flex: 1 1 150px; }
+#dl-format { flex: 2 1 260px; }
+.aim { position: absolute; left: 50%; top: 50%; width: 44%; aspect-ratio: 1; transform: translate(-50%, -50%); border: 2px dashed #2ee6a6; border-radius: 12px; pointer-events: none; display: none; }
+.obj-mode .aim { display: block; }
+.btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }

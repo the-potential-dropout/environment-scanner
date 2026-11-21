@@ -75,42 +75,102 @@
       <!-- 3D SCAN -->
       <section id="tab-scan3d" class="tab">
         <header class="page-head">
-          <h1>3D room scan</h1>
-          <p>Builds a 3D point cloud of the room. Pick the best method your device has: real depth sensing through AR, AI depth from the camera on any device, or import a LiDAR scan made in another app. Drag the 3D view to orbit, pinch or scroll to zoom.</p>
+          <h1>3D scanner: rooms & objects</h1>
+          <p>Scan a whole room, or a single object like a shoe, mug, plant or sculpture, then download it as a 3D model for Blender, 3D printing, AR or games. Drag the 3D view to orbit, pinch or scroll to zoom.</p>
         </header>
+
+        <div class="seg" id="s3d-mode" role="tablist">
+          <button data-mode="room" class="active" role="tab">⬢ Room</button>
+          <button data-mode="object" role="tab">◆ Object</button>
+        </div>
+
+        <div id="obj-opts" class="note hidden">
+          <h3>Object scanning</h3>
+          <div class="row tight">
+            <label class="inline">Object size <input type="range" id="obj-size" min="0.1" max="1.5" step="0.05" value="0.4" /> <span id="obj-size-val">40 cm</span></label>
+            <label class="inline">Camera moves by
+              <select class="select" id="obj-rot">
+                <option value="turntable">Turntable (I turn the object)</option>
+                <option value="compass">Walking around it (compass)</option>
+              </select>
+            </label>
+            <label class="inline" id="obj-step-wrap">Turn per photo
+              <select class="select" id="obj-step"><option>15</option><option>20</option><option selected>30</option><option>45</option></select>°
+            </label>
+            <label class="inline"><input type="checkbox" id="obj-flip" /> Flip turn direction</label>
+          </div>
+          <ul>
+            <li><b>Best:</b> object on a plain table, good even light, nothing shiny or see‑through. A lazy Susan or a piece of paper you rotate works as a turntable.</li>
+            <li><b>AR depth (Android):</b> point at the object first so it locks on, then walk slowly all the way around it.</li>
+            <li><b>AI depth (any device):</b> keep the phone still, take a photo, turn the object by the same angle, repeat until it's gone all the way round (12 photos at 30°).</li>
+          </ul>
+        </div>
+
         <div class="method-grid">
           <div class="method" id="m-ar">
             <div class="top"><b>AR depth scan</b><span class="pill" id="m-ar-pill">checking…</span></div>
-            <p>Uses ARCore depth (time‑of‑flight sensor if your phone has one, otherwise motion stereo) to measure real distances in metres while you walk around. Android Chrome / Samsung Internet on ARCore phones.</p>
+            <p>Uses ARCore depth (time‑of‑flight sensor if your phone has one, otherwise motion stereo) to measure real distances in metres while you move. Android Chrome / Samsung Internet on ARCore phones.</p>
             <button class="btn primary" id="ar-start">Start AR scan</button>
           </div>
           <div class="method">
             <div class="top"><b>AI depth from camera</b><span class="pill ok">any device</span></div>
-            <p>An AI model estimates depth from each camera frame. Stand in one spot, capture, turn about 30°, capture again — the frames are stitched around you using the compass. One‑time ~27 MB model download; runs fully on your device.</p>
+            <p id="ai-desc">An AI model estimates depth from each photo. Stand in one spot, capture, turn about 30°, capture again — views are stitched around you using the compass. One‑time model download (27–50 MB); runs fully on your device.</p>
             <div class="row tight">
               <button class="btn primary" id="ai-start">Open camera</button>
-              <button class="btn" id="ai-capture" disabled>Capture view</button>
+              <button class="btn" id="ai-capture" disabled>Capture</button>
+              <button class="btn ghost" id="ai-undo" disabled>Undo</button>
               <button class="btn ghost" id="ai-stop" disabled>Stop</button>
             </div>
-            <label class="inline">Distance to centre of view <input type="range" id="ai-scale" min="0.5" max="8" step="0.1" value="2.5" /> <span id="ai-scale-val">2.5 m</span></label>
+            <label class="inline"><span id="ai-scale-label">Distance to centre of view</span> <input type="range" id="ai-scale" min="0.2" max="8" step="0.05" value="2.5" /> <span id="ai-scale-val">2.5 m</span></label>
           </div>
           <div class="method">
             <div class="top"><b>Import a LiDAR scan</b><span class="pill ok">any device</span></div>
-            <p>iPhone/iPad Pro LiDAR isn't open to websites. Scan with a free app such as <i>3D Scanner App</i>, <i>Polycam</i> or <i>Scaniverse</i>, export <b>.ply</b> or <b>.obj</b>, and open it here.</p>
-            <label class="btn">Open .ply / .obj<input type="file" id="imp-file" accept=".ply,.obj,.xyz,.txt" hidden /></label>
+            <p>iPhone/iPad Pro LiDAR isn't open to websites. Scan with a free app such as <i>3D Scanner App</i>, <i>Polycam</i> or <i>Scaniverse</i>, export <b>.ply</b> or <b>.obj</b>, and open it here to view, clean up and convert.</p>
+            <label class="btn">Open .ply / .obj / .xyz<input type="file" id="imp-file" accept=".ply,.obj,.xyz,.txt" hidden /></label>
           </div>
         </div>
         <p class="status" id="s3d-status"></p>
-        <div class="video-wrap small-video hidden" id="ai-wrap"><video id="ai-video" playsinline muted></video></div>
+        <div class="video-wrap small-video hidden" id="ai-wrap"><video id="ai-video" playsinline muted></video><div class="aim" id="ai-aim"></div></div>
         <div class="viewer-wrap">
           <canvas id="s3d-view"></canvas>
           <div class="viewer-ui">
             <span id="s3d-count">0 points</span>
             <button class="btn small" id="s3d-top">Top view</button>
             <button class="btn small" id="s3d-reset">Reset view</button>
-            <button class="btn small" id="s3d-export">Export .ply</button>
+            <button class="btn small" id="s3d-quick">Download</button>
             <button class="btn small ghost" id="s3d-clear">Clear</button>
           </div>
+        </div>
+
+        <div class="note" id="dl-panel">
+          <h3>Download your scan</h3>
+          <div class="row tight">
+            <input class="select" id="dl-name" value="room-scan" aria-label="File name" />
+            <select class="select" id="dl-format" aria-label="Format">
+              <option value="glb">GLB — 3D model (Blender, Windows 3D Viewer, Android AR, web)</option>
+              <option value="obj">OBJ — mesh with colours (Blender, MeshLab, most 3D apps)</option>
+              <option value="stl">STL — mesh in mm for 3D printing</option>
+              <option value="plymesh">PLY mesh — coloured mesh</option>
+              <option value="ply">PLY points — raw coloured point cloud</option>
+              <option value="glbpoints">GLB points — point cloud for web/AR viewers</option>
+              <option value="xyz">XYZ — plain text points (CloudCompare, CAD)</option>
+            </select>
+            <label class="inline">Mesh detail
+              <select class="select" id="dl-detail">
+                <option value="auto" selected>Auto</option>
+                <option value="fine">Fine</option>
+                <option value="medium">Medium</option>
+                <option value="coarse">Coarse</option>
+              </select>
+            </label>
+            <button class="btn primary" id="dl-go">Download</button>
+          </div>
+          <div class="row tight">
+            <button class="btn small" id="obj-table" aria-pressed="false">Remove table / floor</button>
+            <button class="btn small" id="obj-clean" aria-pressed="false">Remove stray points</button>
+            <label class="inline"><input type="checkbox" id="dl-center" /> Centre the model, sitting at 0,0,0</label>
+          </div>
+          <p class="hint" id="dl-info">Meshes are made from the AI depth photos when available, otherwise from the point cloud (a solid voxel model that is ready to 3D print). Units are metres, except STL which is millimetres.</p>
         </div>
       </section>
 
