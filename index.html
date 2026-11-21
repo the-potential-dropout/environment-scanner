@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Scan the room you walk into with your phone, tablet or laptop: Bluetooth devices, hidden camera lenses, magnetic fields, sonar room shape, ultrasonic noise and network signal. By Genzineers." />
+  <meta name="theme-color" content="#0b1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Genzineers Environment Scanner</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <noscript>This app needs JavaScript. Made by Genzineers: https://genzineers.com</noscript>
+
+  <div class="shell">
+    <nav class="nav" id="nav" aria-label="Scanners">
+      <div class="brand">
+        <img src="icon.svg" alt="" width="28" height="28" />
+        <div>
+          <strong>Environment Scanner</strong>
+          <small>by Genzineers</small>
+        </div>
+      </div>
+      <button data-tab="overview" class="active"><span class="ico">◎</span><span>Overview</span></button>
+      <button data-tab="scan3d"><span class="ico">⬢</span><span>3D scan</span></button>
+      <button data-tab="bluetooth"><span class="ico">ᛒ</span><span>Bluetooth</span></button>
+      <button data-tab="lens"><span class="ico">◉</span><span>Hidden cams</span></button>
+      <button data-tab="magnet"><span class="ico">⌁</span><span>Magnetic</span></button>
+      <button data-tab="sonar"><span class="ico">◠</span><span>Sonar map</span></button>
+      <button data-tab="audio"><span class="ico">∿</span><span>Ultrasonic</span></button>
+      <button data-tab="light"><span class="ico">☀</span><span>Light</span></button>
+      <button data-tab="thermal"><span class="ico">♨</span><span>Thermal</span></button>
+      <button data-tab="network"><span class="ico">📶</span><span>Network</span></button>
+      <button data-tab="sensors"><span class="ico">⟳</span><span>Motion & GPS</span></button>
+      <button data-tab="addons"><span class="ico">⊕</span><span>NFC & add‑ons</span></button>
+      <button data-tab="map"><span class="ico">▦</span><span>Room map</span></button>
+    </nav>
+
+    <main class="main">
+      <!-- OVERVIEW -->
+      <section id="tab-overview" class="tab active">
+        <header class="page-head">
+          <h1>What can this device sense?</h1>
+          <p>Every phone, tablet and laptop has different sensors, and every browser lets websites use a different subset of them. This page checks yours live. Tap a card to open that scanner.</p>
+        </header>
+        <div id="caps" class="cap-grid"></div>
+
+        <h2 class="h2">Permissions</h2>
+        <p class="muted">The app always asks you first, explains what a sensor is used for, and only then lets the browser show its own permission prompt. You can change your mind here at any time.</p>
+        <div id="perm-list" class="list"></div>
+
+        <h2 class="h2">Every phone sensor, checked</h2>
+        <p class="muted">What each kind of sensor can do in this app. <b>Live</b> = used directly when your browser allows it. <b>Add‑on</b> = works by connecting an external Bluetooth / USB sensor or another app. <b>Blocked</b> = the hardware may exist, but no browser lets websites read it.</p>
+        <div id="matrix" class="matrix"></div>
+
+        <div class="note">
+          <h3>Best browsers</h3>
+          <ul>
+            <li><b>Android</b>: Chrome or Samsung Internet unlock the most (Bluetooth, flashlight, magnetometer, sonar).</li>
+            <li><b>iPhone / iPad</b>: Safari supports camera, sonar, ultrasonic, compass and motion. Apple blocks Web Bluetooth in every iOS browser; use the free <i>Bluefy</i> browser app to get Bluetooth.</li>
+            <li><b>Windows / Mac / Linux</b>: Chrome or Edge for Bluetooth. Firefox and Safari work for camera, sonar and ultrasonic.</li>
+          </ul>
+        </div>
+        <div class="note warn">
+          <h3>Honest limits</h3>
+          <p>Browsers cannot read raw Wi‑Fi scans, cell radio, UWB, Soli radar, the barometer or the iPhone LiDAR directly, and most phones have no thermal camera. Where something is blocked we say so instead of faking it, and offer the closest real alternative (AR depth, AI depth, external sensors, or importing from another app). No scanner can guarantee a room is free of cameras: use this as one tool alongside a careful physical check. Only scan places you are entitled to inspect.</p>
+        </div>
+      </section>
+
+      <!-- 3D SCAN -->
+      <section id="tab-scan3d" class="tab">
+        <header class="page-head">
+          <h1>3D room scan</h1>
+          <p>Builds a 3D point cloud of the room. Pick the best method your device has: real depth sensing through AR, AI depth from the camera on any device, or import a LiDAR scan made in another app. Drag the 3D view to orbit, pinch or scroll to zoom.</p>
+        </header>
+        <div class="method-grid">
+          <div class="method" id="m-ar">
+            <div class="top"><b>AR depth scan</b><span class="pill" id="m-ar-pill">checking…</span></div>
+            <p>Uses ARCore depth (time‑of‑flight sensor if your phone has one, otherwise motion stereo) to measure real distances in metres while you walk around. Android Chrome / Samsung Internet on ARCore phones.</p>
+            <button class="btn primary" id="ar-start">Start AR scan</button>
+          </div>
+          <div class="method">
+            <div class="top"><b>AI depth from camera</b><span class="pill ok">any device</span></div>
+            <p>An AI model estimates depth from each camera frame. Stand in one spot, capture, turn about 30°, capture again — the frames are stitched around you using the compass. One‑time ~27 MB model download; runs fully on your device.</p>
+            <div class="row tight">
+              <button class="btn primary" id="ai-start">Open camera</button>
+              <button class="btn" id="ai-capture" disabled>Capture view</button>
+              <button class="btn ghost" id="ai-stop" disabled>Stop</button>
+            </div>
+            <label class="inline">Distance to centre of view <input type="range" id="ai-scale" min="0.5" max="8" step="0.1" value="2.5" /> <span id="ai-scale-val">2.5 m</span></label>
+          </div>
+          <div class="method">
+            <div class="top"><b>Import a LiDAR scan</b><span class="pill ok">any device</span></div>
+            <p>iPhone/iPad Pro LiDAR isn't open to websites. Scan with a free app such as <i>3D Scanner App</i>, <i>Polycam</i> or <i>Scaniverse</i>, export <b>.ply</b> or <b>.obj</b>, and open it here.</p>
+            <label class="btn">Open .ply / .obj<input type="file" id="imp-file" accept=".ply,.obj,.xyz,.txt" hidden /></label>
+          </div>
+        </div>
+        <p class="status" id="s3d-status"></p>
+        <div class="video-wrap small-video hidden" id="ai-wrap"><video id="ai-video" playsinline muted></video></div>
+        <div class="viewer-wrap">
+          <canvas id="s3d-view"></canvas>
+          <div class="viewer-ui">
+            <span id="s3d-count">0 points</span>
+            <button class="btn small" id="s3d-top">Top view</button>
+            <button class="btn small" id="s3d-reset">Reset view</button>
+            <button class="btn small" id="s3d-export">Export .ply</button>
+            <button class="btn small ghost" id="s3d-clear">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- BLUETOOTH -->
+      <section id="tab-bluetooth" class="tab">
+        <header class="page-head">
+          <h1>Bluetooth devices</h1>
+          <p>Finds Bluetooth Low Energy devices nearby (phones, earbuds, watches, trackers, smart cameras, speakers) and estimates how close each one is from its signal strength. Walk around: the signal rises as you get closer.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="bt-scan">Scan the room</button>
+          <button class="btn" id="bt-pick">Pick one device</button>
+          <button class="btn ghost" id="bt-stop" disabled>Stop</button>
+        </div>
+        <p class="status" id="bt-status"></p>
+        <div id="bt-finder" class="finder hidden">
+          <div class="finder-ring"><div class="finder-dot" id="bt-finder-dot"></div></div>
+          <div>
+            <h3 id="bt-finder-name">Device</h3>
+            <p class="big" id="bt-finder-dist">–</p>
+            <p id="bt-finder-hint">Move slowly. Hotter = closer.</p>
+            <button class="btn small" id="bt-mark">Mark direction on room map</button>
+          </div>
+        </div>
+        <div id="bt-list" class="list"></div>
+        <details class="note">
+          <summary>Why do I only see one device?</summary>
+          <p>Full room scans use Chrome's <i>Bluetooth Scanning</i> feature, which is still behind a switch. On Android or desktop Chrome/Edge open <code>chrome://flags/#enable-experimental-web-platform-features</code>, set it to Enabled and restart the browser. Without it, browsers only let you pick one device at a time from a list (which still shows every nearby device's name).</p>
+        </details>
+      </section>
+
+      <!-- LENS -->
+      <section id="tab-lens" class="tab">
+        <header class="page-head">
+          <h1>Hidden camera finder</h1>
+          <p>Every camera has a lens that reflects light straight back at its source, like a cat's eye. This mode turns on your flashlight, watches the live image and circles tiny bright reflections that stay put while you move. Night‑vision cameras also glow with infrared LEDs that your camera can see but your eyes can't.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="lens-start">Start lens scan</button>
+          <button class="btn" id="lens-ir">Infrared LED mode</button>
+          <button class="btn ghost" id="lens-stop" disabled>Stop</button>
+          <label class="inline">Sensitivity <input type="range" id="lens-sens" min="1" max="10" value="6" /></label>
+        </div>
+        <p class="status" id="lens-status"></p>
+        <div class="video-wrap">
+          <video id="lens-video" playsinline muted></video>
+          <canvas id="lens-overlay"></canvas>
+        </div>
+        <div class="note">
+          <h3>How to sweep a room</h3>
+          <ol>
+            <li>Turn the room lights off and close the curtains.</li>
+            <li>Hold the phone at eye level and turn slowly, pointing at smoke detectors, clocks, chargers, vents, plants, shelves, TVs, mirrors and anything facing the bed or shower.</li>
+            <li>A real lens shows as a small, sharp point that stays bright as you move a little. Glass and metal glints usually vanish when you shift.</li>
+            <li><b>IR mode</b>: in the dark, many front cameras (selfie side) show IR LEDs as purple‑white dots. Point the screen side around the room.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- MAGNET -->
+      <section id="tab-magnet" class="tab">
+        <header class="page-head">
+          <h1>Magnetic field (EMF) detector</h1>
+          <p>Uses the phone's compass chip. Powered electronics, motors, speakers, transformers and many hidden cameras make a local magnetic field. Calibrate away from electronics, then move the top of the phone slowly over walls, objects and furniture. A sudden jump marks something with a magnet or current inside.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="mag-start">Start</button>
+          <button class="btn" id="mag-cal" disabled>Calibrate (set zero)</button>
+          <button class="btn ghost" id="mag-stop" disabled>Stop</button>
+          <label class="inline"><input type="checkbox" id="mag-sound" checked /> Geiger sound</label>
+        </div>
+        <p class="status" id="mag-status"></p>
+        <div class="meter">
+          <div class="meter-val"><span id="mag-val">–</span><small>µT</small></div>
+          <div class="meter-sub">Change from calibration: <b id="mag-delta">–</b> µT</div>
+          <div class="bar"><div id="mag-bar"></div></div>
+        </div>
+        <canvas id="mag-chart" class="chart" height="160"></canvas>
+      </section>
+
+      <!-- SONAR -->
+      <section id="tab-sonar" class="tab">
+        <header class="page-head">
+          <h1>Sonar room mapper</h1>
+          <p>Your speaker plays a short chirp and your microphone listens for the echo, like a bat. The delay gives the distance to the nearest wall or large object in the direction the phone is facing. Stand in the middle of the room, point the phone (speaker side) at a wall, ping, turn, ping again. The dots trace the room's shape.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="sonar-ping">Ping</button>
+          <button class="btn" id="sonar-auto">Auto ping (turn slowly)</button>
+          <button class="btn ghost" id="sonar-clear">Clear</button>
+          <label class="inline">Heading <input type="range" id="sonar-heading" min="0" max="359" value="0" /> <span id="sonar-heading-val">0°</span></label>
+        </div>
+        <p class="status" id="sonar-status"></p>
+        <div class="two">
+          <canvas id="sonar-polar" class="square"></canvas>
+          <canvas id="sonar-echo" class="chart" height="220"></canvas>
+        </div>
+        <p class="hint">On phones with a compass the heading updates by itself. On laptops, drag the heading slider to the direction you're pointing. Accuracy is roughly ±20 cm in quiet rooms; soft furniture and curtains swallow echoes.</p>
+      </section>
+
+      <!-- AUDIO -->
+      <section id="tab-audio" class="tab">
+        <header class="page-head">
+          <h1>Ultrasonic & electronic noise</h1>
+          <p>A live spectrogram from the microphone up to the highest pitch it can hear (usually 20–24 kHz). Switching power supplies, some cameras, tracking beacons and ultrasonic "audio beacons" leave thin bright lines above 15 kHz, above most adults' hearing.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="audio-start">Start listening</button>
+          <button class="btn ghost" id="audio-stop" disabled>Stop</button>
+        </div>
+        <p class="status" id="audio-status"></p>
+        <div class="kv"><div><span>Sound level (uncalibrated)</span><b id="audio-db">–</b></div><div><span>Loudest pitch</span><b id="audio-peak">–</b></div><div><span>Mic hears up to</span><b id="audio-nyq">–</b></div></div>
+        <canvas id="audio-spec" class="spec"></canvas>
+        <div id="audio-peaks" class="list"></div>
+
+        <h2 class="h2">Presence detector (ultrasonic Doppler)</h2>
+        <p class="muted">The speaker plays a steady 19 kHz tone most adults can't hear. Anything moving in the room — a person, a door, a pet — shifts the echo's pitch slightly (Doppler effect), which shows up as motion. Put the phone down, start it, and stay still. Pets may hear it, so keep sessions short.</p>
+        <div class="row">
+          <button class="btn primary" id="dop-start">Start presence detector</button>
+          <button class="btn ghost" id="dop-stop" disabled>Stop</button>
+        </div>
+        <div class="meter">
+          <div class="meter-val"><span id="dop-val">–</span></div>
+          <div class="meter-sub" id="dop-sub">Motion level</div>
+          <div class="bar"><div id="dop-bar"></div></div>
+        </div>
+      </section>
+
+      <!-- LIGHT -->
+      <section id="tab-light" class="tab">
+        <header class="page-head">
+          <h1>Light: brightness, colour temperature & flicker</h1>
+          <p>Uses the light sensor when the browser exposes it, otherwise the camera. Shows how bright the room is, whether the lighting is warm or cool (in kelvin), and whether lamps or screens are flickering. Hidden devices with status LEDs can show up as a sudden flicker in a dark room.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="light-start">Start</button>
+          <button class="btn ghost" id="light-stop" disabled>Stop</button>
+        </div>
+        <p class="status" id="light-status"></p>
+        <div class="kv" id="light-kv"></div>
+        <div class="swatch" id="light-swatch"></div>
+        <canvas id="light-chart" class="chart" height="140"></canvas>
+        <video id="light-video" playsinline muted class="hidden"></video>
+      </section>
+
+      <!-- THERMAL -->
+      <section id="tab-thermal" class="tab">
+        <header class="page-head">
+          <h1>Thermal view</h1>
+          <p>No phone or laptop has a heat sensor that websites can read. Plug in a USB thermal camera that works as a webcam (UVC; many FLIR, InfiRay, TOPDON and HIKMICRO models do) and pick it below to see real heat signatures in false colour. With an ordinary camera this view only colours <i>brightness</i>, not temperature.</p>
+        </header>
+        <div class="row">
+          <select id="thermal-cam" class="select"><option value="">Choose a camera…</option></select>
+          <select id="thermal-pal" class="select">
+            <option value="iron">Ironbow</option>
+            <option value="rainbow">Rainbow</option>
+            <option value="white">White hot</option>
+          </select>
+          <button class="btn primary" id="thermal-start">Start</button>
+          <button class="btn ghost" id="thermal-stop" disabled>Stop</button>
+        </div>
+        <p class="status" id="thermal-status"></p>
+        <div class="video-wrap"><canvas id="thermal-canvas"></canvas></div>
+        <video id="thermal-video" playsinline muted class="hidden"></video>
+      </section>
+
+      <!-- NETWORK -->
+      <section id="tab-network" class="tab">
+        <header class="page-head">
+          <h1>Network signal</h1>
+          <p>Browsers aren't allowed to list Wi‑Fi networks or read raw radio strength. What they can do: report your connection type and speed, and measure round‑trip time. Walk around while this runs: latency and speed get worse where the Wi‑Fi or mobile signal is weak, so you can find dead spots and the direction of the router.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="net-start">Start live test</button>
+          <button class="btn ghost" id="net-stop" disabled>Stop</button>
+        </div>
+        <div id="net-info" class="kv"></div>
+        <canvas id="net-chart" class="chart" height="160"></canvas>
+        <details class="note">
+          <summary>Want real Wi‑Fi and device scanning?</summary>
+          <p>Scanning every Wi‑Fi network and every device on the network needs an installed app, not a website. On Android, apps like <i>WiFiAnalyzer</i> (Wi‑Fi strength) and <i>Fing</i> (devices on your network, often including cameras) do this. On a laptop, your router's admin page lists every connected device.</p>
+        </details>
+      </section>
+
+      <!-- SENSORS -->
+      <section id="tab-sensors" class="tab">
+        <header class="page-head">
+          <h1>Motion, level, vibration & GPS</h1>
+          <p>Accelerometer and gyroscope show which way is down, how level a surface is and tiny vibrations (footsteps, machines, appliances behind a wall). GPS gives position, altitude and speed.</p>
+        </header>
+        <div class="row">
+          <button class="btn primary" id="sens-start">Start motion sensors</button>
+          <button class="btn" id="geo-start">Start GPS</button>
+        </div>
+        <p class="status" id="sens-status"></p>
+        <div class="two">
+          <canvas id="level-canvas" class="square"></canvas>
+          <div>
+            <div id="sens-grid" class="sens-grid"></div>
+            <canvas id="seis-chart" class="chart" height="140"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD-ONS -->
+      <section id="tab-addons" class="tab">
+        <header class="page-head">
+          <h1>NFC tags & add‑on sensors</h1>
+          <p>Read NFC tags hidden in objects, and connect external sensors over Bluetooth or USB to add what phones can't do on the web: air quality, humidity, pressure, temperature, mmWave radar presence, thermal arrays, Geiger counters and more.</p>
+        </header>
+
+        <div class="method-grid">
+          <div class="method">
+            <div class="top"><b>NFC tag reader</b><span class="pill" id="nfc-pill">checking…</span></div>
+            <p>Hold the back of the phone against stickers, posters, cards and objects. Finds hidden NFC tags and shows what they contain. Android Chrome / Samsung Internet.</p>
+            <button class="btn primary" id="nfc-start">Start NFC scan</button>
+          </div>
+          <div class="method">
+            <div class="top"><b>Bluetooth environment sensor</b><span class="pill" id="ess-pill">checking…</span></div>
+            <p>Connects to any Bluetooth sensor that uses the standard <i>Environmental Sensing</i> profile: temperature, humidity, pressure, UV, gas, wind and more. Many cheap thermo‑hygrometers and DIY ESP32 boards work.</p>
+            <button class="btn primary" id="ess-start">Connect sensor</button>
+          </div>
+          <div class="method">
+            <div class="top"><b>USB / serial sensor</b><span class="pill" id="ser-pill">checking…</span></div>
+            <p>Plug in an Arduino, ESP32 or sensor board that prints readings like <code>co2=612 voc=31</code> or JSON lines. Works with mmWave radar (e.g. LD2410), MLX90640 thermal arrays, PM2.5 / VOC / CO₂ sensors, Geiger counters.</p>
+            <div class="row tight">
+              <button class="btn primary" id="ser-start">Connect USB device</button>
+              <select class="select" id="ser-baud"><option>9600</option><option selected>115200</option><option>256000</option></select>
+            </div>
+          </div>
+        </div>
+        <p class="status" id="addon-status"></p>
+        <div id="addon-grid" class="sens-grid"></div>
+        <div id="nfc-list" class="list"></div>
+        <details class="note">
+          <summary>Example sketch for an ESP32 / Arduino sensor</summary>
+<pre><code>void setup() { Serial.begin(115200); }
+void loop() {
+  float t = readTemp(), h = readHumidity();
+  Serial.print("temp_c="); Serial.print(t);
+  Serial.print(" humidity="); Serial.println(h);
+  delay(500);
+}</code></pre>
+          <p>Any <code>name=value</code> pairs or a JSON object per line will appear as live tiles above and are saved in your scan export.</p>
+        </details>
+      </section>
+
+      <!-- MAP -->
+      <section id="tab-map" class="tab">
+        <header class="page-head">
+          <h1>Room map</h1>
+          <p>Everything you've found, placed around you: the room outline from sonar pings, Bluetooth devices whose direction you marked, and suspected lenses or magnetic hot spots you saved. You are the dot in the middle.</p>
+        </header>
+        <div class="row">
+          <button class="btn" id="map-add">Add a note at this heading</button>
+          <button class="btn" id="map-export">Export scan (JSON)</button>
+          <button class="btn ghost" id="map-clear">Clear map</button>
+        </div>
+        <canvas id="map-canvas" class="square big-square"></canvas>
+        <div id="map-list" class="list"></div>
+      </section>
+
+      <footer class="foot">
+        <p>© 2026 <a href="https://genzineers.com/?utm_source=app&utm_medium=footer&utm_campaign=env-scanner" target="_blank" rel="noopener">Genzineers</a>. Free for personal and non‑commercial use. Commercial use needs a licence: <a href="mailto:genzineers@gmail.com">genzineers@gmail.com</a>. <a href="https://github.com/the-potential-dropout/environment-scanner/blob/main/LICENSE" target="_blank" rel="noopener">Licence</a></p>
+        <p>Learn to build tools like this: <a href="https://thepotentialdropout.com/?utm_source=app&utm_medium=footer&utm_campaign=env-scanner" target="_blank" rel="noopener">thepotentialdropout.com</a> · <a href="https://potentialdropout.com/?utm_source=app&utm_medium=footer&utm_campaign=env-scanner" target="_blank" rel="noopener">potentialdropout.com</a></p>
+        <p class="tiny">Everything runs on your device. Nothing you scan is uploaded anywhere.</p>
+      </footer>
+    </main>
+  </div>
+
+  <div id="consent" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="consent-title">
+    <div class="modal-card">
+      <div class="modal-ico" id="consent-ico">◎</div>
+      <h2 id="consent-title">Allow access?</h2>
+      <p id="consent-body"></p>
+      <ul id="consent-uses"></ul>
+      <p class="tiny">Data stays on this device. Your browser may ask once more.</p>
+      <label class="inline"><input type="checkbox" id="consent-remember" checked /> Remember my choice</label>
+      <div class="row end">
+        <button class="btn ghost" id="consent-no">Not now</button>
+        <button class="btn primary" id="consent-yes">Allow</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+  <script src="scan3d.js"></script>
+</body>
+</html>
